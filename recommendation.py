@@ -19,7 +19,11 @@ class Recommendation(object):
 		self.recommendation_model = None
 		# Create the playlist dataframe
 		self.create_playlist_dataframe()
-	
+
+		#Metrics results
+		global_results = None
+		details_results = None
+
 	def collaborative_filtering(self, pid):
 		# get songs where pid is elected
 		interacted_tracks, non_interacted_tracks=get_interactions(self.df, pid)
@@ -39,7 +43,7 @@ class Recommendation(object):
 		u, sigma, vt = svds(sparse_matrix, k = 30)  # k is number of factors
 		sigma = np.diag(sigma) #para hacerla diagonal
 
-		predicted_playlist_evaluations = np.dot(np.dot(u, sigma), vt) 
+		predicted_playlist_evaluations = np.dot(np.dot(u, sigma), vt)
 
 		#Normalizar los valores
 		playlist_predicted_ratings_norm = (predicted_playlist_evaluations - predicted_playlist_evaluations.min()) / (predicted_playlist_evaluations.max() - predicted_playlist_evaluations.min())
@@ -61,7 +65,8 @@ class Recommendation(object):
 		# store the recomendation model
 		self.recommendation_model = collaborative_rec_model_recommendations
 
-
+		#Get model metrics
+		self.global_results, self.details_results = get_metrics_rec_model(self.df,collaborative_rec_model)
 
 
 	def create_playlist_dataframe(self):
@@ -113,7 +118,7 @@ class Recommendation(object):
 		# remove the url texts from the track_name column
 		for i in range(len(df)):
 			df.loc[i,'track_name'] = re.sub(r'((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*', "", df.loc[i,'track_name'])
-			
+
 			# remove the url texts from the artist_name column
 			df.loc[i,'artist_name'] = re.sub(r'((http|https)\:\/\/)?[a-zA-Z0-9\.\/\?\:@\-_=#]+\.([a-zA-Z]){2,6}([a-zA-Z0-9\.\&\/\?\:@\-_=#])*', "", df.loc[i,'artist_name'])
 
@@ -131,7 +136,7 @@ class Recommendation(object):
 		#Create unique string id for each track
 		df['track_id'] = df['track_name'] + df['artist_name'] + df['album_name']
 		# ! REVIEW IF THIS IS NEEDED IN THE FUTURE
-		# #standardize the nambe of the variables 
+		# #standardize the nambe of the variables
 		# df = clean(df, method = "standardize")
 
 		self.df = df

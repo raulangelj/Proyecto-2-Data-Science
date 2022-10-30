@@ -28,7 +28,7 @@ import streamlit as st
 
 # 	df_with_tracks2 = pd.json_normalize(df_with_tracks['tracks'])
 
-# 	#Reindex dataframe 
+# 	#Reindex dataframe
 # 	df_with_tracks = df_with_tracks.reset_index(drop=True)
 
 # 	df_with_tracks2['pid'] = df_with_tracks['pid']
@@ -54,6 +54,12 @@ import streamlit as st
 #     st.session_state['ctr'] = 0
 
 @st.cache(allow_output_mutation=True)
+def get_collaborative(filtered_playlist,recommendation_class):
+	recommendation_class.collaborative_filtering(filtered_playlist['pid'].iloc[0])
+	return recommendation_class
+
+
+@st.cache(allow_output_mutation=True)
 def get_model(data):
 	jsons = [json.loads(line.read()) for line in data]
 	for file in jsons:
@@ -76,7 +82,7 @@ def get_model(data):
 
 	df_with_tracks2 = pd.json_normalize(df_with_tracks['tracks'])
 
-	#Reindex dataframe 
+	#Reindex dataframe
 	df_with_tracks = df_with_tracks.reset_index(drop=True)
 
 	df_with_tracks2['pid'] = df_with_tracks['pid']
@@ -101,7 +107,7 @@ print("im here")
 data = st.sidebar.file_uploader('Upload your data', type=['json'], accept_multiple_files=True)
 
 if data is not None and len(data) > 0:
-    
+
 	recommendation_class, ALBUMS_X, ALBUMS_Y, ARTIST_X, ARTIST_Y = get_model(data)
 
 	# Show the actual dataframe to wrok with
@@ -130,15 +136,22 @@ if data is not None and len(data) > 0:
 		# order filter playlist by pid
 		filtered_playlist = filtered_playlist.sort_values(by=['pid'])
 		print('filtered_playlist', filtered_playlist)
-		recommendation_class.collaborative_filtering(filtered_playlist['pid'].iloc[0])
-		
+
+		recommendation_class = get_collaborative(filtered_playlist,recommendation_class)
 		# Show the user the playlist
 		st.write('This are the songs of the playlist you selected:')
 		st.write(recommendation_class.interacted_tracks)
-		
+
 		# show the user the recommendations
 		st.write('This are the recommendations for the playlist you selected:')
 		st.write(recommendation_class.recommendation_model)
+		#Show metrics
+		if st.checkbox("Global collaborative filtering metrics"):
+			st.write("This are the global results:")
+			st.write(recommendation_class.global_results)
+		if st.checkbox("Detail collaborative filtering metrics"):
+			st.write("This are the detail results:")
+			st.write(recommendation_class.detail_results)
 		# songs_list = filtered_playlist['tracks'][playlists.index(option)]
 		# option = st.selectbox(
 		# 'Elija una playlist',
