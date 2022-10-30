@@ -1,29 +1,18 @@
-from io import StringIO
+from recommendation import *
 import json
 import numpy as np
 import pandas as pd
 import streamlit as st
 
-def cleaning(df):
-  # remove the nan values from test and train data sets
-  df = df.dropna()
-  df = df.drop(['track_uri'], axis=1)
-  # remove the artist_uri column frolm df
-  df = df.drop(['artist_uri'], axis=1)
-  # remove the album_uri column frolm df
-  df = df.drop(['album_uri'], axis=1)
-  
-  
-  return df
-
 #get data with text input
-st.title('Data Science Project')
-st.write('This is a data science project')
-st.write('Please enter the data below')
+st.title("""
+    # Proyecto 2 | Data Science
+    """)
+st.write('Waiting for data input...')
 print("im here")
 data = st.sidebar.file_uploader('Upload your data', type=['json'], accept_multiple_files=True)
-loaded = False
-if data is not None and len(data) > 0 and not loaded:
+
+if data is not None and len(data) > 0:
     jsons = [json.loads(line.read()) for line in data]
     for file in jsons:
         file.pop('info')
@@ -35,16 +24,46 @@ if data is not None and len(data) > 0 and not loaded:
             if key not in data:
                 data[key] = []
             data[key].extend(file[key])
-    df = pd.DataFrame(pd.json_normalize(data['playlists']))
-    
-    # df = cleaning(df)
+    df_original = pd.DataFrame(pd.json_normalize(data['playlists']))
+    #New dataframe with tracks and pid
+    df = pd.DataFrame(df_original['tracks'])
+    df['pid'] = df_original['pid']
 
-    st.write(df)
-    playlists = df['name'].tolist()
+    #Separate tracks in different rows
+    df_with_tracks= df.explode('tracks')
 
-    st.write("""
-    # Proyecto 2 | Data Science
-    """)
+    df_with_tracks2 = pd.json_normalize(df_with_tracks['tracks'])
+
+    #Reindex dataframe 
+    df_with_tracks = df_with_tracks.reset_index(drop=True)
+
+    df_with_tracks2['pid'] = df_with_tracks['pid']
+
+    # df = cleaning(df_with_tracks2)
+    recommendation_class = Recommendation(df_with_tracks2)
+    recommendation_class.cleaning()
+
+
+    st.write(recommendation_class.df)
+
+    # Getting the top 5 albums
+    ALBUMS_X, ALBUMS_Y = recommendation_class.get_top_5_albums()
+
+    # Getting the top 5 artists
+    ARTIST_X, ARTIST_Y = recommendation_class.get_top_5_artists()
+
+    # Getting the top 5 artists bar chart
+    if st.sidebar.checkbox('Show top 5 Artists'):
+      # create a data frame with the top 5 artists
+      top_5_artists = pd.DataFrame({'Artists': ARTIST_X, 'Songs Amount': ARTIST_Y})
+
+      st.bar_chart(top_5_artists, x='Artists', y='Songs Amount')
+
+    if st.sidebar.checkbox('Show top 5 Albums'):
+      # create a data frame with the top 5 albums
+      top_5_albums = pd.DataFrame({'Albums': ALBUMS_X, 'Songs Amount': ALBUMS_Y})
+
+      st.bar_chart(top_5_albums, x='Albums', y='Songs Amount')
 
     if st.checkbox('Collaborative Filtering'):
       st.write("""
