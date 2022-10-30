@@ -68,11 +68,6 @@ class Recommendation(object):
 		global_results, details_results = get_metrics_rec_model(self.df,collaborative_rec_model)
 
 		return recommendation_model, interacted_tracks, global_results, details_results
-	
-	# def get_metrics(self, collaborative_rec_model)
-	# 	#Get model metrics
-	# 	global_results, details_results = get_metrics_rec_model(self.df,collaborative_rec_model)
-	# 	return global_results, details_results
 
 
 	def create_playlist_dataframe(self):
