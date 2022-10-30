@@ -4,6 +4,18 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+def cleaning(df):
+  # remove the nan values from test and train data sets
+  df = df.dropna()
+  df = df.drop(['track_uri'], axis=1)
+  # remove the artist_uri column frolm df
+  df = df.drop(['artist_uri'], axis=1)
+  # remove the album_uri column frolm df
+  df = df.drop(['album_uri'], axis=1)
+  
+  
+  return df
+
 #get data with text input
 st.title('Data Science Project')
 st.write('This is a data science project')
@@ -12,17 +24,21 @@ print("im here")
 data = st.sidebar.file_uploader('Upload your data', type=['json'], accept_multiple_files=True)
 loaded = False
 if data is not None and len(data) > 0 and not loaded:
-    jsons = []
-    for line in data:
-        jsons.append(json.loads(line.read()))
-
+    jsons = [json.loads(line.read()) for line in data]
     for file in jsons:
         file.pop('info')
 
-    #json normalize of every file and concat in one dataframe
-    df = pd.concat(pd.json_normalize(file) for file in jsons)
+    # move all the data from jsons to a single object
+    data = {}
+    for file in jsons:
+        for key in file.keys():
+            if key not in data:
+                data[key] = []
+            data[key].extend(file[key])
+    df = pd.DataFrame(pd.json_normalize(data['playlists']))
+    
+    # df = cleaning(df)
 
-    print(df)
     st.write(df)
     playlists = df['name'].tolist()
 
