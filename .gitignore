@@ -1,3 +1,5 @@
 venv/
 test_set/
 train_set/
+.vscode/
+__pycache__/
