@@ -4,59 +4,11 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-
-
-# def upload_callback():
-# 	jsons = [json.loads(line.read()) for line in data]
-# 	for file in jsons:
-# 		file.pop('info')
-
-#     # move all the data from jsons to a single object
-# 	data = {}
-# 	for file in jsons:
-# 		for key in file.keys():
-# 			if key not in data:
-# 				data[key] = []
-# 			data[key].extend(file[key])
-# 	df_original = pd.DataFrame(pd.json_normalize(data['playlists']))
-#     #New dataframe with tracks and pid
-# 	df = pd.DataFrame(df_original['tracks'])
-# 	df['pid'] = df_original['pid']
-
-#     #Separate tracks in different rows
-# 	df_with_tracks= df.explode('tracks')
-
-# 	df_with_tracks2 = pd.json_normalize(df_with_tracks['tracks'])
-
-# 	#Reindex dataframe
-# 	df_with_tracks = df_with_tracks.reset_index(drop=True)
-
-# 	df_with_tracks2['pid'] = df_with_tracks['pid']
-
-# 	# df = cleaning(df_with_tracks2)
-# 	recommendation_class = Recommendation(df_with_tracks2)
-# 	recommendation_class.cleaning()
-
-
-# 	st.write(recommendation_class.df)
-
-# 	# Getting the top 5 albums
-# 	ALBUMS_X, ALBUMS_Y = recommendation_class.get_top_5_albums()
-
-# 	# Getting the top 5 artists
-# 	ARTIST_X, ARTIST_Y = recommendation_class.get_top_5_artists()
-
-# 	if st.session_state['file_uploader'] is not None:
-# 		st.session_state['ctr'] += 1
-# 		print('upload_callback', st.session_state['ctr'])
-
-# if 'ctr' not in st.session_state:
-#     st.session_state['ctr'] = 0
-
 @st.cache(allow_output_mutation=True)
 def get_collaborative(filtered_playlist,recommendation_class):
-	recommendation_class.collaborative_filtering(filtered_playlist['pid'].iloc[0])
-	return recommendation_class
+	recommendation_model, interacted_tracks, global_results, details_results = recommendation_class.collaborative_filtering(filtered_playlist['pid'].iloc[0])
+	return recommendation_model, interacted_tracks, global_results, details_results
+	# return recommendation_class
 
 
 @st.cache(allow_output_mutation=True)
@@ -135,23 +87,23 @@ if data is not None and len(data) > 0:
 		filtered_playlist = recommendation_class.original_df.loc[recommendation_class.original_df['name'] == option]
 		# order filter playlist by pid
 		filtered_playlist = filtered_playlist.sort_values(by=['pid'])
-		print('filtered_playlist', filtered_playlist)
+		# print('filtered_playlist', filtered_playlist)
 
-		recommendation_class = get_collaborative(filtered_playlist,recommendation_class)
+		recommendation_model, interacted_tracks, global_results, details_results = get_collaborative(filtered_playlist,recommendation_class)
 		# Show the user the playlist
 		st.write('This are the songs of the playlist you selected:')
-		st.write(recommendation_class.interacted_tracks)
+		st.write(interacted_tracks)
 
 		# show the user the recommendations
 		st.write('This are the recommendations for the playlist you selected:')
-		st.write(recommendation_class.recommendation_model)
+		st.write(recommendation_model)
 		#Show metrics
 		if st.checkbox("Global collaborative filtering metrics"):
 			st.write("This are the global results:")
-			st.write(recommendation_class.global_results)
+			st.write(global_results)
 		if st.checkbox("Detail collaborative filtering metrics"):
 			st.write("This are the detail results:")
-			st.write(recommendation_class.detail_results)
+			st.write(details_results)
 		# songs_list = filtered_playlist['tracks'][playlists.index(option)]
 		# option = st.selectbox(
 		# 'Elija una playlist',

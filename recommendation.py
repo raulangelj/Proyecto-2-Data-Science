@@ -21,8 +21,8 @@ class Recommendation(object):
 		self.create_playlist_dataframe()
 
 		#Metrics results
-		global_results = None
-		details_results = None
+		self.global_results = None
+		self.details_results = None
 
 	def collaborative_filtering(self, pid):
 		# get songs where pid is elected
@@ -30,10 +30,9 @@ class Recommendation(object):
 		#Get track name , pid and artist head
 		interacted_tracks[['track_name', 'pid', 'artist_name']].head(50)
 		# store the tracks of the playlist selected
-		self.interacted_tracks = interacted_tracks
+		interacted_tracks = interacted_tracks
 
-		# start the collaborative filtering
-		self.df['event_strength'] = 1
+		# start the collaborative filteringx
 		#Crear la matriz con pid como row y cancion como column, con pivot tira error por las rows duplicadas
 		factorization_matrix = self.df.pivot_table(index='pid',columns='track_id',values='event_strength',aggfunc='sum',).fillna(0)
 
@@ -54,7 +53,7 @@ class Recommendation(object):
 		# usamos el modelo de colaborative filetring
 		collaborative_rec_model = CF_Rec(factorization_matrix_df)
 
-		interacted_tracks_list = self.interacted_tracks['track_id'].tolist()
+		interacted_tracks_list = interacted_tracks['track_id'].tolist()
 		collaborative_rec_model_recommendations = collaborative_rec_model.make_recommendation(pid, interacted_tracks_list)
 
 		#Obtener la informacion completa del dataframe original sin dupliccados
@@ -63,10 +62,17 @@ class Recommendation(object):
 		collaborative_rec_model_recommendations = collaborative_rec_model_recommendations.merge(tracks_df, how = 'left', left_on = 'track_id', right_on = 'track_id')[['rec_punctuation', 'track_id', 'track_name', 'artist_name']]
 
 		# store the recomendation model
-		self.recommendation_model = collaborative_rec_model_recommendations
-
+		recommendation_model = collaborative_rec_model_recommendations
+		
 		#Get model metrics
-		self.global_results, self.details_results = get_metrics_rec_model(self.df,collaborative_rec_model)
+		global_results, details_results = get_metrics_rec_model(self.df,collaborative_rec_model)
+
+		return recommendation_model, interacted_tracks, global_results, details_results
+	
+	# def get_metrics(self, collaborative_rec_model)
+	# 	#Get model metrics
+	# 	global_results, details_results = get_metrics_rec_model(self.df,collaborative_rec_model)
+	# 	return global_results, details_results
 
 
 	def create_playlist_dataframe(self):
@@ -140,3 +146,4 @@ class Recommendation(object):
 		# df = clean(df, method = "standardize")
 
 		self.df = df
+		self.df['event_strength'] = 1
