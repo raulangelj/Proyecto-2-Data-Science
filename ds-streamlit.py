@@ -10,6 +10,10 @@ def get_collaborative(filtered_playlist,recommendation_class):
 	return recommendation_model, interacted_tracks, global_results, details_results
 	# return recommendation_class
 
+@st.cache(allow_output_mutation=True)
+def get_popularity(filtered_playlist, recommendation_class):
+	recommendation_model, interacted_tracks, global_results, details_results = recommendation_class.popularity_filtering(filtered_playlist['pid'].iloc[0])
+	return recommendation_model, interacted_tracks, global_results, details_results
 
 @st.cache(allow_output_mutation=True)
 def get_model(data):
@@ -38,6 +42,10 @@ def get_model(data):
 	df_with_tracks = df_with_tracks.reset_index(drop=True)
 
 	df_with_tracks2['pid'] = df_with_tracks['pid']
+	# pid = train_dataset['pid']
+	# name = train_dataset['name']
+	# followers = train_dataset['num_followers']
+	# playlist_df = pd.DataFrame({'pid': pid, 'playlist_name': name, 'playlist_followers': followers})
 
 	# df = cleaning(df_with_tracks2)
 	recommendation_class = Recommendation(df_with_tracks2, df_original)
@@ -48,6 +56,10 @@ def get_model(data):
 
 	# Getting the top 5 artists
 	ARTIST_X, ARTIST_Y = recommendation_class.get_top_5_artists()
+
+
+
+
 	return recommendation_class, ALBUMS_X, ALBUMS_Y, ARTIST_X, ARTIST_Y
 
 
@@ -61,6 +73,8 @@ data = st.sidebar.file_uploader('Upload your data', type=['json'], accept_multip
 if data is not None and len(data) > 0:
 
 	recommendation_class, ALBUMS_X, ALBUMS_Y, ARTIST_X, ARTIST_Y = get_model(data)
+
+	
 
 	# Show the actual dataframe to wrok with
 	st.write(recommendation_class.df)
@@ -76,7 +90,7 @@ if data is not None and len(data) > 0:
 		top_5_albums = pd.DataFrame({'Albums': ALBUMS_X, 'Songs Amount': ALBUMS_Y})
 
 		st.bar_chart(top_5_albums, x='Albums', y='Songs Amount')
-
+#......
 	if st.sidebar.checkbox('Collaborative Filtering'):
 		st.write("""## Collaborative Filtering""")
 		playlists = recommendation_class.playlist_df['playlist_name'].tolist()
@@ -89,7 +103,7 @@ if data is not None and len(data) > 0:
 		filtered_playlist = filtered_playlist.sort_values(by=['pid'])
 		# print('filtered_playlist', filtered_playlist)
 
-		recommendation_model, interacted_tracks, global_results, details_results = get_collaborative(filtered_playlist,recommendation_class)
+		recommendation_model, interacted_tracks, global_results, details_results = get_collaborative(filtered_playlist, recommendation_class)
 		# Show the user the playlist
 		st.write('This are the songs of the playlist you selected:')
 		st.write(interacted_tracks)
@@ -104,6 +118,74 @@ if data is not None and len(data) > 0:
 		if st.checkbox("Detail collaborative filtering metrics"):
 			st.write("This are the detail results:")
 			st.write(details_results)
+#......
+	if st.sidebar.checkbox('Popularity Filtering'):
+		st.write("""## Popularity Filtering""")
+		playlists = recommendation_class.playlist_df['playlist_name'].tolist()
+		option = st.selectbox(
+			'Choose a playlist',
+			playlists
+		)
+		filtered_playlist = recommendation_class.original_df.loc[recommendation_class.original_df['name'] == option]
+		# order filter playlist by pid
+		filtered_playlist = filtered_playlist.sort_values(by=['pid'])
+		# print('filtered_playlist', filtered_playlist)
+
+		recommendation_model, interacted_tracks, global_results, details_results = get_popularity(filtered_playlist,recommendation_class)
+		# Show the user the playlist
+		st.write('This are the songs of the playlist you selected:')
+		st.write(interacted_tracks)
+
+		# show the user the recommendations
+		st.write('This are the recommendations for the playlist you selected:')
+		st.write(recommendation_model)
+		#Show metrics
+		if st.checkbox("Global Popularity filtering metrics"):
+			st.write("This are the global results:")
+			st.write(global_results)
+		if st.checkbox("Detail Popularity filtering metrics"):
+			st.write("This are the detail results:")
+			st.write(details_results)
+
+if st.sidebar.checkbox('General Metrics'):
+		st.write("""## General Metrics """)
+		
+		playlists = recommendation_class.playlist_df['playlist_name'].tolist()
+		option = st.selectbox(
+			'Choose a playlist',
+			playlists
+		)
+		filtered_playlist = recommendation_class.original_df.loc[recommendation_class.original_df['name'] == option]
+		# order filter playlist by pid
+		filtered_playlist = filtered_playlist.sort_values(by=['pid'])
+		# print('filtered_playlist', filtered_playlist)
+
+		recommendation_model, interacted_tracks, global_results, details_results = get_popularity(filtered_playlist,recommendation_class)
+
+		# Show the user the playlist
+		st.write('This are the songs of the playlist you selected:')
+		st.write(interacted_tracks)
+
+		# show the user the recommendations
+		st.write('This are the recommendations for the playlist you selected:')
+		st.write(recommendation_model)
+		#Show metrics
+		if st.checkbox("Global Popularity filtering metrics"):
+			st.write("This are the global results:")
+			st.write(global_results)
+		if st.checkbox("Detail Popularity filtering metrics"):
+			st.write("This are the detail results:")
+			st.write(details_results)
+
+
+
+
+
+
+
+
+
+
 		# songs_list = filtered_playlist['tracks'][playlists.index(option)]
 		# option = st.selectbox(
 		# 'Elija una playlist',

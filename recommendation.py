@@ -10,7 +10,6 @@ import re
 
 class Recommendation(object):
 	def __init__(self, df, original_df):
-		print(df.head())
 		# df is the dataframe with only the tracks
 		self.df = df
 		# original_df is the original dataframe with the tracks and the playlists
@@ -72,8 +71,23 @@ class Recommendation(object):
 		return recommendation_model, interacted_tracks, global_results, details_results
 
 	def popularity_filtering(self, pid):
-		popularity_rec_model = PopularityRecommender(self.df)
+		# get songs where pid is elected
+		interacted_tracks, non_interacted_tracks=get_interactions(self.df, pid)
+		#Get track name , pid and artist head
+		interacted_tracks[['track_name', 'pid', 'artist_name']].head(50)
+		# store the tracks of the playlist selected
+		interacted_tracks = interacted_tracks
+	
+		popularity_rec_model = PopularityRecommender(self.df, self.original_df)
 
+		#Get model metrics
+		global_results, details_results = get_metrics_rec_model(self.df, popularity_rec_model)
+
+		popularity_rec_model_recommendations = popularity_rec_model.make_recommendation(pid)
+
+		return popularity_rec_model_recommendations, interacted_tracks, global_results, details_results
+
+	
 
 	def create_playlist_dataframe(self):
 		#save pid and name of the playlist
