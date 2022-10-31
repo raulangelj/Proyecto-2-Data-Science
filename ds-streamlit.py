@@ -1,3 +1,4 @@
+from turtle import color
 from recommendation import *
 import json
 import numpy as np
@@ -167,8 +168,8 @@ if data is not None and len(data) > 0:
 				# popularity_rec_model_details
 				# collaborative_rec_model_details
 
-				plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity')
-				plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative')
+				plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity', color='#4b163b')
+				plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative', color='#1fdf64')
 
 				plt.xticks(X_axis, models)
 				plt.xlabel("Hits")
@@ -192,8 +193,8 @@ if data is not None and len(data) > 0:
 
 				X_axis = np.arange(len(models))
 				fig2 = plt.figure()
-				plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity')
-				plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative')
+				plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity', color='#4b163b')
+				plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative', color='#1fdf64')
 
 				plt.xticks(X_axis, models)
 				plt.xlabel("Recall")
