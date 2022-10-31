@@ -1,4 +1,5 @@
 venv/
+env/
 test_set/
 train_set/
 .vscode/
