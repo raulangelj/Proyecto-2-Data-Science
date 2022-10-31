@@ -3,6 +3,7 @@ import json
 import numpy as np
 import pandas as pd
 import streamlit as st
+from PIL import Image
 
 @st.cache(allow_output_mutation=True)
 def get_collaborative(filtered_playlist,recommendation_class):
@@ -66,6 +67,8 @@ def get_model(data):
 st.title("""
     # Proyecto 2 | Data Science
     """)
+image = Image.open('./assets/spotify-logo.jpg')
+st.sidebar.image(image)
 st.write('Waiting for data input...')
 #print("im here")
 data = st.sidebar.file_uploader('Upload your data', type=['json'], accept_multiple_files=True)
