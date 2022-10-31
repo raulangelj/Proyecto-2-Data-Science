@@ -74,7 +74,7 @@ if data is not None and len(data) > 0:
 
 	recommendation_class, ALBUMS_X, ALBUMS_Y, ARTIST_X, ARTIST_Y = get_model(data)
 
-	
+
 
 	# Show the actual dataframe to wrok with
 	st.write(recommendation_class.df)
@@ -90,13 +90,16 @@ if data is not None and len(data) > 0:
 		top_5_albums = pd.DataFrame({'Albums': ALBUMS_X, 'Songs Amount': ALBUMS_Y})
 
 		st.bar_chart(top_5_albums, x='Albums', y='Songs Amount')
+
+	checkbox_collaborative = st.sidebar.checkbox('Collaborative Filtering')
 #......
-	if st.sidebar.checkbox('Collaborative Filtering'):
+	if checkbox_collaborative:
 		st.write("""## Collaborative Filtering""")
 		playlists = recommendation_class.playlist_df['playlist_name'].tolist()
 		option = st.selectbox(
 			'Choose a playlist',
-			playlists
+			playlists,
+			key=1
 		)
 		filtered_playlist = recommendation_class.original_df.loc[recommendation_class.original_df['name'] == option]
 		# order filter playlist by pid
@@ -119,19 +122,21 @@ if data is not None and len(data) > 0:
 			st.write("This are the detail results:")
 			st.write(details_results)
 #......
-	if st.sidebar.checkbox('Popularity Filtering'):
+	checkbox_popularity = st.sidebar.checkbox('Popularity Filtering')
+	if checkbox_popularity:
 		st.write("""## Popularity Filtering""")
 		playlists = recommendation_class.playlist_df['playlist_name'].tolist()
 		option = st.selectbox(
 			'Choose a playlist',
-			playlists
+			playlists,
+			key=2
 		)
 		filtered_playlist = recommendation_class.original_df.loc[recommendation_class.original_df['name'] == option]
 		# order filter playlist by pid
 		filtered_playlist = filtered_playlist.sort_values(by=['pid'])
 		# print('filtered_playlist', filtered_playlist)
 
-		recommendation_model, interacted_tracks, global_results, details_results = get_popularity(filtered_playlist,recommendation_class)
+		recommendation_model, interacted_tracks, global_results, details_results_popularity = get_popularity(filtered_playlist,recommendation_class)
 		# Show the user the playlist
 		st.write('This are the songs of the playlist you selected:')
 		st.write(interacted_tracks)
@@ -145,37 +150,54 @@ if data is not None and len(data) > 0:
 			st.write(global_results)
 		if st.checkbox("Detail Popularity filtering metrics"):
 			st.write("This are the detail results:")
-			st.write(details_results)
+			st.write(details_results_popularity)
 
-if st.sidebar.checkbox('General Metrics'):
-		st.write("""## General Metrics """)
-		
-		playlists = recommendation_class.playlist_df['playlist_name'].tolist()
-		option = st.selectbox(
-			'Choose a playlist',
-			playlists
-		)
-		filtered_playlist = recommendation_class.original_df.loc[recommendation_class.original_df['name'] == option]
-		# order filter playlist by pid
-		filtered_playlist = filtered_playlist.sort_values(by=['pid'])
-		# print('filtered_playlist', filtered_playlist)
+if checkbox_popularity == True and checkbox_collaborative == True:
+		if st.sidebar.checkbox('General metrics'):
+			st.write("## General metrics")
+			#Hits
+			models= ["Hits 5", "Hits 10"]
+			modelo1 = [details_results_popularity['hits5'].sum(),details_results_popularity['hits10'].sum()]
+			modelo2 = [details_results['hits5'].sum(),details_results['hits10'].sum()]
+			fig = plt.figure()
+			X_axis = np.arange(len(models))
+			# popularity_rec_model_details
+			# collaborative_rec_model_details
 
-		recommendation_model, interacted_tracks, global_results, details_results = get_popularity(filtered_playlist,recommendation_class)
+			plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity')
+			plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative')
 
-		# Show the user the playlist
-		st.write('This are the songs of the playlist you selected:')
-		st.write(interacted_tracks)
+			plt.xticks(X_axis, models)
+			plt.xlabel("Hits")
+			plt.ylabel("Cantidad de hits")
+			plt.title("Comparacion de hits de modelos")
+			plt.legend()
+			st.pyplot(fig)
 
-		# show the user the recommendations
-		st.write('This are the recommendations for the playlist you selected:')
-		st.write(recommendation_model)
-		#Show metrics
-		if st.checkbox("Global Popularity filtering metrics"):
-			st.write("This are the global results:")
-			st.write(global_results)
-		if st.checkbox("Detail Popularity filtering metrics"):
-			st.write("This are the detail results:")
-			st.write(details_results)
+			models= ["Recall 5", "Recall 10"]
+
+			total_count = details_results_popularity['count'].sum()
+			popularity_global_recall_at_5 = details_results_popularity['hits5'].sum() / total_count
+			popularity_global_recall_at_10 = details_results_popularity['hits10'].sum() / total_count
+
+			total_count = details_results['count'].sum()
+			collaborative_global_recall_at_5 = details_results['hits5'].sum() / total_count
+			collaborative_global_recall_at_10 = details_results['hits10'].sum() / total_count
+
+			modelo1 = [popularity_global_recall_at_5, popularity_global_recall_at_10]
+			modelo2 = [collaborative_global_recall_at_5, collaborative_global_recall_at_10]
+
+			X_axis = np.arange(len(models))
+			fig2 = plt.figure()
+			plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity')
+			plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative')
+
+			plt.xticks(X_axis, models)
+			plt.xlabel("Recall")
+			plt.ylabel("Cantidad de recall")
+			plt.title("Comparacion de recall de modelos")
+			plt.legend()
+			st.pyplot(fig2)
 
 
 
