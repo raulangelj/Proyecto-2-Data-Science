@@ -67,7 +67,7 @@ st.title("""
     # Proyecto 2 | Data Science
     """)
 st.write('Waiting for data input...')
-print("im here")
+#print("im here")
 data = st.sidebar.file_uploader('Upload your data', type=['json'], accept_multiple_files=True)
 
 if data is not None and len(data) > 0:
@@ -152,52 +152,52 @@ if data is not None and len(data) > 0:
 			st.write("This are the detail results:")
 			st.write(details_results_popularity)
 
-if checkbox_popularity == True and checkbox_collaborative == True:
-		if st.sidebar.checkbox('General metrics'):
-			st.write("## General metrics")
-			#Hits
-			models= ["Hits 5", "Hits 10"]
-			modelo1 = [details_results_popularity['hits5'].sum(),details_results_popularity['hits10'].sum()]
-			modelo2 = [details_results['hits5'].sum(),details_results['hits10'].sum()]
-			fig = plt.figure()
-			X_axis = np.arange(len(models))
-			# popularity_rec_model_details
-			# collaborative_rec_model_details
+	if checkbox_popularity == True and checkbox_collaborative == True:
+			if st.sidebar.checkbox('General metrics'):
+				st.write("## General metrics")
+				#Hits
+				models= ["Hits 5", "Hits 10"]
+				modelo1 = [details_results_popularity['hits5'].sum(),details_results_popularity['hits10'].sum()]
+				modelo2 = [details_results['hits5'].sum(),details_results['hits10'].sum()]
+				fig = plt.figure()
+				X_axis = np.arange(len(models))
+				# popularity_rec_model_details
+				# collaborative_rec_model_details
 
-			plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity')
-			plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative')
+				plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity')
+				plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative')
 
-			plt.xticks(X_axis, models)
-			plt.xlabel("Hits")
-			plt.ylabel("Cantidad de hits")
-			plt.title("Comparacion de hits de modelos")
-			plt.legend()
-			st.pyplot(fig)
+				plt.xticks(X_axis, models)
+				plt.xlabel("Hits")
+				plt.ylabel("Cantidad de hits")
+				plt.title("Comparacion de hits de modelos")
+				plt.legend()
+				st.pyplot(fig)
 
-			models= ["Recall 5", "Recall 10"]
+				models= ["Recall 5", "Recall 10"]
 
-			total_count = details_results_popularity['count'].sum()
-			popularity_global_recall_at_5 = details_results_popularity['hits5'].sum() / total_count
-			popularity_global_recall_at_10 = details_results_popularity['hits10'].sum() / total_count
+				total_count = details_results_popularity['count'].sum()
+				popularity_global_recall_at_5 = details_results_popularity['hits5'].sum() / total_count
+				popularity_global_recall_at_10 = details_results_popularity['hits10'].sum() / total_count
 
-			total_count = details_results['count'].sum()
-			collaborative_global_recall_at_5 = details_results['hits5'].sum() / total_count
-			collaborative_global_recall_at_10 = details_results['hits10'].sum() / total_count
+				total_count = details_results['count'].sum()
+				collaborative_global_recall_at_5 = details_results['hits5'].sum() / total_count
+				collaborative_global_recall_at_10 = details_results['hits10'].sum() / total_count
 
-			modelo1 = [popularity_global_recall_at_5, popularity_global_recall_at_10]
-			modelo2 = [collaborative_global_recall_at_5, collaborative_global_recall_at_10]
+				modelo1 = [popularity_global_recall_at_5, popularity_global_recall_at_10]
+				modelo2 = [collaborative_global_recall_at_5, collaborative_global_recall_at_10]
 
-			X_axis = np.arange(len(models))
-			fig2 = plt.figure()
-			plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity')
-			plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative')
+				X_axis = np.arange(len(models))
+				fig2 = plt.figure()
+				plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity')
+				plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative')
 
-			plt.xticks(X_axis, models)
-			plt.xlabel("Recall")
-			plt.ylabel("Cantidad de recall")
-			plt.title("Comparacion de recall de modelos")
-			plt.legend()
-			st.pyplot(fig2)
+				plt.xticks(X_axis, models)
+				plt.xlabel("Recall")
+				plt.ylabel("Cantidad de recall")
+				plt.title("Comparacion de recall de modelos")
+				plt.legend()
+				st.pyplot(fig2)
 
 
 
