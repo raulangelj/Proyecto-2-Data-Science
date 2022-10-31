@@ -1,5 +1,6 @@
 from collaborative import *
 from string import punctuation
+from popularity import PopularityRecommender
 from scipy.sparse.linalg import svds
 from scipy.sparse import csr_matrix
 import numpy as np
@@ -9,6 +10,7 @@ import re
 
 class Recommendation(object):
 	def __init__(self, df, original_df):
+		print(df.head())
 		# df is the dataframe with only the tracks
 		self.df = df
 		# original_df is the original dataframe with the tracks and the playlists
@@ -68,6 +70,9 @@ class Recommendation(object):
 		global_results, details_results = get_metrics_rec_model(self.df,collaborative_rec_model)
 
 		return recommendation_model, interacted_tracks, global_results, details_results
+
+	def popularity_filtering(self, pid):
+		popularity_rec_model = PopularityRecommender(self.df)
 
 
 	def create_playlist_dataframe(self):
