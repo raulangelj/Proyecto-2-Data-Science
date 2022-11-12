@@ -4,6 +4,7 @@ import json
 import numpy as np
 import pandas as pd
 import streamlit as st
+import plotly.express as px
 from PIL import Image
 
 @st.cache(allow_output_mutation=True)
@@ -160,23 +161,39 @@ if data is not None and len(data) > 0:
 			if st.sidebar.checkbox('General metrics'):
 				st.write("## General metrics")
 				#Hits
-				models= ["Hits 5", "Hits 10"]
-				modelo1 = [details_results_popularity['hits5'].sum(),details_results_popularity['hits10'].sum()]
-				modelo2 = [details_results['hits5'].sum(),details_results['hits10'].sum()]
-				fig = plt.figure()
-				X_axis = np.arange(len(models))
-				# popularity_rec_model_details
-				# collaborative_rec_model_details
+				# create one dataframe with percentage of hits for popularity and collaborative metrics
+				total_hits_5 = details_results_popularity['hits5'].sum() + details_results['hits5'].sum()
+				percentage_p = round(details_results_popularity['hits5'].sum() / total_hits_5 * 100, 2)
+				percentage_c = round(details_results['hits5'].sum() / total_hits_5 * 100, 2)
+				# create one dataframe with percentage of hits for popularity and collaborative metrics
+				total_hits_10 = details_results_popularity['hits10'].sum() + details_results['hits10'].sum()
+				percentage_p10 = round(details_results_popularity['hits10'].sum() / total_hits_10 * 100, 2)
+				percentage_c10 = round(details_results['hits10'].sum() / total_hits_10 * 100, 2)
 
-				plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity', color='#4b163b')
-				plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative', color='#1fdf64')
+				# create one dataframe with percentage of hits with popularity and collaborative as column name
+				hits = pd.DataFrame({'Popularity': [percentage_p, percentage_p10], 'Collaborative': [percentage_c, percentage_c10]}, index=['Hits 5', 'Hits 10'])
+				st.write(hits)
 
-				plt.xticks(X_axis, models)
-				plt.xlabel("Hits")
-				plt.ylabel("Cantidad de hits")
-				plt.title("Comparacion de hits de modelos")
-				plt.legend()
-				st.pyplot(fig)
+				names = ['Popularity', 'Collaborative']
+				values = [percentage_p, percentage_c]
+				fig = px.pie(values =values,names = names, title='Percentage of hits 5')
+				st.plotly_chart(fig)
+				# fig.show()
+
+				#values of hits 10
+				values = [percentage_p10, percentage_c10]
+				fig = px.pie(values =values,names = names, title='Percentage of hits 10')
+				st.plotly_chart(fig)
+
+				#px.bar of hits
+				df = pd.DataFrame(
+					[["Hits 5 ",details_results_popularity['hits5'].sum(), details_results['hits5'].sum()], ["Hits 10", details_results_popularity['hits10'].sum(), details_results['hits10'].sum()]],
+					columns=["Hits", "Popularity", "Collaborative"]
+				)
+
+				fig = px.bar(df, x="Hits", y=["Popularity", "Collaborative"], barmode='group', height=400, title='Hits of Popularity and Collaborative')
+				# st.dataframe(df) # if need to display dataframe
+				st.plotly_chart(fig)
 
 				models= ["Recall 5", "Recall 10"]
 
@@ -193,15 +210,12 @@ if data is not None and len(data) > 0:
 
 				X_axis = np.arange(len(models))
 				fig2 = plt.figure()
-				plt.bar(X_axis - 0.2, modelo1, 0.4, label = 'Popularity', color='#4b163b')
-				plt.bar(X_axis + 0.2, modelo2, 0.4, label = 'Collaborative', color='#1fdf64')
+				#make px.bar of model recall results
+				df = pd.DataFrame(
+					[["Recall 5", popularity_global_recall_at_5,collaborative_global_recall_at_5], ["Recall 10", popularity_global_recall_at_10,collaborative_global_recall_at_10]],
+					columns=["Recall", "Popularity", "Collaborative"]
+				)
 
-				plt.xticks(X_axis, models)
-				plt.xlabel("Recall")
-				plt.ylabel("Cantidad de recall")
-				plt.title("Comparacion de recall de modelos")
-				plt.legend()
-				st.pyplot(fig2)
-
-
-
+				fig = px.bar(df, x="Recall", y=["Popularity","Collaborative"], barmode='group', height=400, title='Recall of Popularity and Collaborative')
+				# st.dataframe(df) # if need to display dataframe
+				st.plotly_chart(fig)
